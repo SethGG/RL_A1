@@ -21,38 +21,48 @@ class NeuralNet(nn.Module):
 
 
 class DQNAgent:
-    def __init__(self, n_actions, n_states, epsilon, alpha, gamma):
+    def __init__(self, n_actions, n_states, epsilon, alpha, gamma, update_freq):
         self.n_actions = n_actions
         self.n_states = n_states
         self.epsilon = epsilon
         self.gamma = gamma
+        self.update_freq = update_freq
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.loss_function = nn.MSELoss().to(self.device)
         self.Q = NeuralNet(n_states, n_actions, self.device)
-        self.optimizer = optim.SGD(self.Q.parameters(), lr=alpha)
+        self.optimizer = optim.Adam(self.Q.parameters(), lr=alpha)
+        self.update_buffer = []
 
     def select_action(self, state):  # ϵ-greedy policy
         if np.random.random() > self.epsilon:
-            state = torch.FloatTensor(state).to(self.device)
+            state = torch.tensor(state, dtype=torch.float, device=self.device)
             q_values = self.Q.forward(state)
             action = torch.argmax(q_values).item()
         else:
             action = np.random.choice(self.n_actions)
         return action
 
-    def update(self, state, action, reward, next_state):  # Q-Learning update equation
-        state = torch.FloatTensor(state).to(self.device)
-        action = torch.Tensor(action).to(self.device)
-        reward = torch.Tensor(reward).to(self.device)
-        next_state = torch.FloatTensor(next_state).to(self.device)
+    def update(self, state, action, reward, next_state, done):  # Q-Learning update equation
+        self.update_buffer.append((state, action, reward, next_state, done))
+        if len(self.update_buffer) < self.update_freq:
+            return
 
-        q_value = self.Q.forward(state)[action]
-        q_next = self.Q.forward(next_state).max()
+        state, action, reward, next_state, done = (np.array(x) for x in zip(*self.update_buffer))
+        self.update_buffer.clear()
 
-        td_target = reward + self.gamma * q_next
-        td_delta = self.loss_function(q_value, td_target)
+        state = torch.tensor(state, dtype=torch.float, device=self.device)
+        action = torch.tensor(action, dtype=torch.int64, device=self.device).unsqueeze(1)
+        reward = torch.tensor(reward, dtype=torch.int, device=self.device)
+        next_state = torch.tensor(next_state, dtype=torch.float, device=self.device)
+        done = torch.tensor(done, dtype=torch.int, device=self.device)
+
+        q_value = self.Q.forward(state).gather(1, action).squeeze()
+        q_next = self.Q.forward(next_state).max(1)[0]
+
+        q_target = reward + self.gamma * q_next * (1 - done)
+        q_loss = self.loss_function(q_value, q_target)
 
         self.optimizer.zero_grad()
-        td_delta.backward()
+        q_loss.backward()
         self.optimizer.step()
