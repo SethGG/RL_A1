@@ -29,6 +29,7 @@ class DQNAgent:
         self.update_freq = update_freq
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cpu")
         self.loss_function = nn.MSELoss().to(self.device)
         self.Q = NeuralNet(n_states, n_actions, self.device, hidden_dim)
         self.optimizer = optim.Adam(self.Q.parameters(), lr=alpha)
