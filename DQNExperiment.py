@@ -50,7 +50,7 @@ def run_repetitions_multiprocessing(outfile, n_processes, n_repetitions, n_episo
 
 def experiment_1():
     n_repetitions = 5
-    n_episodes = 3000
+    n_episodes = 5000
     gamma = 1
     epsilon = 0.1
     update_freq = 10
@@ -64,7 +64,7 @@ def experiment_1():
     outdir = "naive_alpha"
     os.makedirs(outdir, exist_ok=True)
 
-    n_processes = 3  # set the number of processes for parallel execution
+    n_processes = 5  # set the number of processes for parallel execution
 
     for alpha in learning_rates:
         outfile = os.path.join(outdir, f"alpha_{alpha}.csv")
@@ -82,7 +82,7 @@ def experiment_1():
 
 def experiment_2():
     n_repetitions = 5
-    n_episodes = 3000
+    n_episodes = 5000
     gamma = 1
     epsilon = 0.1
     alpha = 0.001
@@ -96,7 +96,7 @@ def experiment_2():
     outdir = "naive_update_freq"
     os.makedirs(outdir, exist_ok=True)
 
-    n_processes = 3  # set the number of processes for parallel execution
+    n_processes = 5  # set the number of processes for parallel execution
 
     for update_freq in update_freqs:
         outfile = os.path.join(outdir, f"update_freq_{update_freq}.csv")
@@ -114,5 +114,5 @@ def experiment_2():
 
 if __name__ == '__main__':
     experiment_1()
-    # experiment_2()
+    experiment_2()
     # experiment_3()
