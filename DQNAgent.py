@@ -60,9 +60,11 @@ class DQNAgent:
         done = torch.tensor(done, dtype=torch.int, device=self.device)
 
         q_value = self.Q.forward(state).gather(1, action).squeeze(1)
-        q_next = self.Q.forward(next_state).max(1)[0]
 
+        with torch.no_grad():
+            q_next = self.Q.forward(next_state).max(1)[0]
         q_target = reward + self.gamma * q_next * (1 - done)
+
         q_loss = self.loss_function(q_value, q_target)
 
         self.optimizer.zero_grad()
