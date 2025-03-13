@@ -112,7 +112,39 @@ def experiment_2():
     plot.save(name="naive_dqn_learning_curve_freq")
 
 
+def experiment_3():
+    n_repetitions = 5
+    n_episodes = 5000
+    gamma = 1
+    alpha = 0.001
+    hidden_dim = 128
+    update_freq = 10
+
+    epsilons = [0.05, 0.1, 0.2, 0.5]
+
+    smoothing_window = 31
+    plot = LearningCurvePlot("Naive DQN learning curve")
+
+    outdir = "naive_epsilon"
+    os.makedirs(outdir, exist_ok=True)
+
+    n_processes = 5  # set the number of processes for parallel execution
+
+    for epsilon in epsilons:
+        outfile = os.path.join(outdir, f"epsilon_{epsilon}.csv")
+        if not os.path.exists(outfile):
+            run_repetitions_multiprocessing(outfile, n_processes, n_repetitions, n_episodes,
+                                            epsilon, alpha, gamma, update_freq, hidden_dim)
+        episode_returns = np.loadtxt(outfile, delimiter=",", ndmin=2)
+        mean_episode_returns = np.mean(episode_returns, axis=0)
+
+        plot.add_curve(range(1, n_episodes+1), smooth(mean_episode_returns,
+                       window=smoothing_window), label=f"ϵ = {epsilon}")
+
+    plot.save(name="naive_dqn_learning_curve_epsilon")
+
+
 if __name__ == '__main__':
     experiment_1()
     experiment_2()
-    # experiment_3()
+    experiment_3()
