@@ -19,10 +19,11 @@ def run_single_repetition(args):
         s, info = env.reset()
         if ep % 100 == 0:
             env_steps = int(episode_returns.sum())
-            print(f"Running repitition {rep_id:2}, Finished {ep:4} episodes, "
+            print(f"Running repitition {rep_id+1:2}, Finished {ep:4} episodes, "
                   f"Environment steps: {env_steps:7}")
         done = False
-        while not done:
+        trunc = False
+        while not done and not trunc:
             a = agent.select_action(s)
             s_next, r, done, trunc, info = env.step(a)
             agent.update(s, a, r, s_next, done)
@@ -50,7 +51,7 @@ def run_repetitions_multiprocessing(outfile, n_processes, n_repetitions, n_episo
 
 def experiment_1():
     n_repetitions = 5
-    n_episodes = 3000
+    n_episodes = 4000
     gamma = 1
     epsilon = 0.1
     update_freq = 4
@@ -82,7 +83,7 @@ def experiment_1():
 
 def experiment_2():
     n_repetitions = 5
-    n_episodes = 3000
+    n_episodes = 4000
     gamma = 1
     epsilon = 0.1
     alpha = 0.001
@@ -114,7 +115,7 @@ def experiment_2():
 
 def experiment_3():
     n_repetitions = 5
-    n_episodes = 3000
+    n_episodes = 4000
     gamma = 1
     alpha = 0.001
     hidden_dim = 128
