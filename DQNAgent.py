@@ -21,10 +21,9 @@ class NeuralNet(nn.Module):
 
 
 class DQNAgent:
-    def __init__(self, n_actions, n_states, epsilon, alpha, gamma, update_freq, hidden_dim):
+    def __init__(self, n_actions, n_states, alpha, gamma, update_freq, hidden_dim):
         self.n_actions = n_actions
         self.n_states = n_states
-        self.epsilon = epsilon
         self.gamma = gamma
         self.update_freq = update_freq
 
@@ -35,8 +34,8 @@ class DQNAgent:
         self.optimizer = optim.Adam(self.Q.parameters(), lr=alpha)
         self.update_buffer = []
 
-    def select_action(self, state):  # ϵ-greedy policy
-        if np.random.random() > self.epsilon:
+    def select_action(self, state, epsilon):  # ϵ-greedy policy
+        if np.random.random() > epsilon:
             state = torch.tensor(state, dtype=torch.float, device=self.device)
             with torch.no_grad():
                 q_values = self.Q.forward(state)

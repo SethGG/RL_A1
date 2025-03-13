@@ -16,16 +16,17 @@ class LearningCurvePlot:
 
     def __init__(self, title=None):
         self.fig, self.ax = plt.subplots()
-        self.ax.set_xlabel('Episode')
+        self.ax.set_xlabel('Environment steps')
         self.ax.set_ylabel('Reward')
         if title is not None:
             self.ax.set_title(title)
 
-    def add_curve(self, x, y, label=None):
+    def add_curve(self, x, y, y_conf, label=None):
         ''' y: vector of average reward results
         label: string to appear as label in plot legend '''
         if label is not None:
             self.ax.plot(x, y, label=label)
+            self.ax.fill_between(x, np.subtract(y, y_conf), np.add(y, y_conf), alpha=0.2)
         else:
             self.ax.plot(x, y)
 
