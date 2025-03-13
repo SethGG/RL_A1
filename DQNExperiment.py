@@ -53,7 +53,7 @@ def experiment_1():
     n_episodes = 5000
     gamma = 1
     epsilon = 0.1
-    update_freq = 10
+    update_freq = 4
     hidden_dim = 128
 
     learning_rates = [0.0001, 0.001, 0.01, 0.1]
@@ -88,7 +88,7 @@ def experiment_2():
     alpha = 0.001
     hidden_dim = 128
 
-    update_freqs = [1, 10, 100]
+    update_freqs = [4, 16, 64]
 
     smoothing_window = 31
     plot = LearningCurvePlot("Naive DQN learning curve")
@@ -118,7 +118,7 @@ def experiment_3():
     gamma = 1
     alpha = 0.001
     hidden_dim = 128
-    update_freq = 10
+    update_freq = 4
 
     epsilons = [0.05, 0.1, 0.2, 0.5]
 
