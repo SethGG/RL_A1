@@ -50,7 +50,7 @@ def run_repetitions_multiprocessing(outfile, n_processes, n_repetitions, n_episo
 
 def experiment_1():
     n_repetitions = 5
-    n_episodes = 5000
+    n_episodes = 3000
     gamma = 1
     epsilon = 0.1
     update_freq = 4
@@ -82,7 +82,7 @@ def experiment_1():
 
 def experiment_2():
     n_repetitions = 5
-    n_episodes = 5000
+    n_episodes = 3000
     gamma = 1
     epsilon = 0.1
     alpha = 0.001
@@ -114,7 +114,7 @@ def experiment_2():
 
 def experiment_3():
     n_repetitions = 5
-    n_episodes = 5000
+    n_episodes = 3000
     gamma = 1
     alpha = 0.001
     hidden_dim = 128
