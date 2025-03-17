@@ -31,7 +31,7 @@ def run_single_repetition(task):
     tn = params["tn"]
     er = params["er"]
 
-    tn_update_freq = 5
+    tn_update_freq = 10
 
     # Create a new environment and agent for each repetition.
     env = gym.make('CartPole-v1')
