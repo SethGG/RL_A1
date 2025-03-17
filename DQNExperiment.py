@@ -80,8 +80,11 @@ def run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_
 
     tasks = []
     for config_id, params in enumerate(param_combinations):
+        if params in (t[-1] for t in tasks):
+            print(f"Configuration {config_id+1} is already present in the task list. Skipping...")
+            continue
         if os.path.exists(conf_filename(outdir, params, "eval")):
-            print(f"Results for configuration {config_id} already exist. Skipping...")
+            print(f"Results for configuration {config_id+1} already exist. Skipping...")
             continue
         for rep_id in range(n_repetitions):
             tasks.append((config_id, rep_id, n_envsteps, eval_interval, params))
@@ -164,4 +167,13 @@ if __name__ == '__main__':
     outdir = f"evaluations_{n_envsteps}_envsteps"
 
     run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval)
-    # create_plot(outdir, param_combinations, n_repetitions, "Test plot", ["tn", "er"], "test.png")
+    # Experiment 5
+    create_plot(outdir, param_combinations[0:4], n_repetitions, "Test plot", ["tn", "er"], "experiment5.png")
+    # Experiment 1
+    create_plot(outdir, param_combinations[4:7], n_repetitions, "Test plot", ["alpha"], "experiment1.png")
+    # Experiment 2
+    create_plot(outdir, param_combinations[7:10], n_repetitions, "Test plot", ["update_freq"], "experiment2.png")
+    # Experiment 3
+    create_plot(outdir, param_combinations[10:13], n_repetitions, "Test plot", ["decay_rate"], "experiment3.png")
+    # Experiment 4
+    create_plot(outdir, param_combinations[13:16], n_repetitions, "Test plot", ["hidden_dim"], "experiment4.png")
