@@ -31,7 +31,7 @@ def run_single_repetition(task):
     tn = params["tn"]
     er = params["er"]
 
-    tn_update_freq = 200
+    tn_update_freq = 5
 
     # Create a new environment and agent for each repetition.
     env = gym.make('CartPole-v1')
@@ -42,6 +42,7 @@ def run_single_repetition(task):
     agent = DQNAgent(n_actions, n_states, alpha, gamma, update_freq, hidden_dim, tn, er)
 
     eval_num = 0
+    tn_update_count = 0
     s, info = env.reset()
     for step in range(1, n_envsteps+1):
         a = agent.select_action(s, epsilon)
@@ -49,12 +50,13 @@ def run_single_repetition(task):
         agent.update(s, a, r, s_next, done)
         s = s_next
 
-        if tn and step % tn_update_freq == 0:
-            agent.update_tn()
-
         if done or trunc:
             s, info = env.reset()
             epsilon *= decay_rate
+            tn_update_count += 1
+            if tn_update_count == tn_update_freq:
+                agent.update_tn()
+                tn_update_count = 0
 
         if step % eval_internal == 0:
             eval_return = evaluation(agent)
@@ -105,8 +107,8 @@ def run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_
                 np.savetxt(conf_filename(outdir, param_combinations[config_id], "eps"), results_eps, delimiter=",")
 
 
-def create_plot(outdir, param_combinations, n_repetitions, title, label_params, plotfile):
-    smoothing_window = 31
+def create_plot(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval, title, label_params, plotfile):
+    smoothing_window = 50
     plot = LearningCurvePlot(title)
 
     for params in param_combinations:
@@ -133,18 +135,18 @@ if __name__ == '__main__':
             "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
         # Experiment 1 (alpha 0.0001, 0.001, 0.01)
         {"gamma": 1, "alpha": 0.0001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.01, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
         # Experiment 2 (update freq 4, 32, 128)
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 32, "epsilon": 1,
-            "decay_rate": 0.999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 128, "epsilon": 1,
-            "decay_rate": 0.999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
         # Experiment 3 (eps decay rate 0.9999, 0.999, 0.99)
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
             "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
@@ -168,12 +170,17 @@ if __name__ == '__main__':
 
     run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval)
     # Experiment 5
-    create_plot(outdir, param_combinations[0:4], n_repetitions, "Test plot", ["tn", "er"], "experiment5.png")
+    create_plot(outdir, param_combinations[0:4], n_repetitions, n_envsteps, eval_interval,
+                "Test plot", ["tn", "er"], "experiment5.png")
     # Experiment 1
-    create_plot(outdir, param_combinations[4:7], n_repetitions, "Test plot", ["alpha"], "experiment1.png")
+    create_plot(outdir, param_combinations[4:7], n_repetitions, n_envsteps, eval_interval,
+                "Test plot", ["alpha"], "experiment1.png")
     # Experiment 2
-    create_plot(outdir, param_combinations[7:10], n_repetitions, "Test plot", ["update_freq"], "experiment2.png")
+    create_plot(outdir, param_combinations[7:10], n_repetitions, n_envsteps, eval_interval,
+                "Test plot", ["update_freq"], "experiment2.png")
     # Experiment 3
-    create_plot(outdir, param_combinations[10:13], n_repetitions, "Test plot", ["decay_rate"], "experiment3.png")
+    create_plot(outdir, param_combinations[10:13], n_repetitions, n_envsteps, eval_interval,
+                "Test plot", ["decay_rate"], "experiment3.png")
     # Experiment 4
-    create_plot(outdir, param_combinations[13:16], n_repetitions, "Test plot", ["hidden_dim"], "experiment4.png")
+    create_plot(outdir, param_combinations[13:16], n_repetitions, n_envsteps, eval_interval,
+                "Test plot", ["hidden_dim"], "experiment4.png")
