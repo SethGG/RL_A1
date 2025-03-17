@@ -102,7 +102,7 @@ def run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_
                 np.savetxt(conf_filename(outdir, param_combinations[config_id], "eps"), results_eps, delimiter=",")
 
 
-def create_plot(outdir, params_combinations, n_repetitions, title, label_params, plotfile):
+def create_plot(outdir, param_combinations, n_repetitions, title, label_params, plotfile):
     smoothing_window = 31
     plot = LearningCurvePlot(title)
 
