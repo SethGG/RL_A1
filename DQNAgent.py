@@ -96,7 +96,7 @@ class DQNAgent:
             else:
                 q_next = self.Q.forward(next_state).max(1)[0]
 
-        q_target = reward + self.gamma * q_next * (1 - done)
+            q_target = reward + self.gamma * q_next * (1 - done)
 
         q_loss = self.loss_function(q_value, q_target)
 
