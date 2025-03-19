@@ -31,7 +31,7 @@ def run_single_repetition(task):
     tn = params["tn"]
     er = params["er"]
 
-    tn_update_freq = 10
+    tn_update_freq = 5
 
     # Create a new environment and agent for each repetition.
     env = gym.make('CartPole-v1')
@@ -107,18 +107,33 @@ def run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_
                 np.savetxt(conf_filename(outdir, param_combinations[config_id], "eps"), results_eps, delimiter=",")
 
 
-def create_plot(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval, title, label_params, plotfile):
-    smoothing_window = 50
+def create_plot(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval, title, label_params, plotfile,
+                plot_eps=False, plot_baseline=False):
+    smoothing_window = 31
     plot = LearningCurvePlot(title)
 
     for params in param_combinations:
         results_eval = np.loadtxt(conf_filename(outdir, params, "eval"), delimiter=",", ndmin=2)
+        if plot_eps:
+            results_eps = np.loadtxt(conf_filename(outdir, params, "eps"), delimiter=",", ndmin=2)
+            mean_results_eps = np.mean(results_eps, axis=0)
         mean_results_eval = np.mean(results_eval, axis=0)
         conf_results_eval = np.std(results_eval, axis=0) / np.sqrt(n_repetitions)
 
         plot.add_curve(range(eval_interval, n_envsteps+eval_interval, eval_interval), smooth(mean_results_eval,
                        window=smoothing_window), smooth(conf_results_eval, window=smoothing_window),
                        label=", ".join(f"{p}: {params[p]}" for p in label_params))
+        if plot_eps:
+            plot.add_epsilon_curve(range(eval_interval, n_envsteps+eval_interval, eval_interval), mean_results_eps)
+
+    if plot_baseline:
+        baseline_results = np.loadtxt("RandomBaselineCartPole.csv", delimiter=",", skiprows=1)
+        baseline_results_split = np.split(baseline_results, 2)
+        baseline_results_mean = np.mean(baseline_results_split, axis=0)
+        baseline_envsteps = baseline_results_mean[:, 2]
+        baseline_eval = baseline_results_mean[:, 1]
+        plot.add_curve(baseline_envsteps, baseline_eval, label="baseline")
+
     plot.save(name=plotfile)
 
 
@@ -126,41 +141,41 @@ if __name__ == '__main__':
     param_combinations = [
         # Experiment 5 (tn and er)
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": True, "er": True},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": True, "er": True},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": True, "er": False},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": True, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": True},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": False, "er": True},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": False, "er": False},
         # Experiment 1 (alpha 0.0001, 0.001, 0.01)
         {"gamma": 1, "alpha": 0.0001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.01, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": False, "er": False},
         # Experiment 2 (update freq 4, 32, 128)
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 128, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 32, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 128, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 128, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 128, "tn": False, "er": False},
         # Experiment 3 (eps decay rate 0.9999, 0.999, 0.99)
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9999, "hidden_dim": 128, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.999, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.9995, "hidden_dim": 128, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.99, "hidden_dim": 64, "tn": False, "er": False},
+            "decay_rate": 0.999, "hidden_dim": 128, "tn": False, "er": False},
         # Experiment 4 (hidden dim 16, 32, 64)
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
             "decay_rate": 0.9999, "hidden_dim": 16, "tn": False, "er": False},
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
-            "decay_rate": 0.9999, "hidden_dim": 32, "tn": False, "er": False},
-        {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
             "decay_rate": 0.9999, "hidden_dim": 64, "tn": False, "er": False},
+        {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
+            "decay_rate": 0.9999, "hidden_dim": 128, "tn": False, "er": False},
     ]
 
     n_repetitions = 5
@@ -171,16 +186,22 @@ if __name__ == '__main__':
     run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval)
     # Experiment 5
     create_plot(outdir, param_combinations[0:4], n_repetitions, n_envsteps, eval_interval,
-                "Test plot", ["tn", "er"], "experiment5.png")
+                "Comparison between Naive DQN and DQN with TN and ER", ["tn", "er"], "experiment5.png")
     # Experiment 1
     create_plot(outdir, param_combinations[4:7], n_repetitions, n_envsteps, eval_interval,
-                "Test plot", ["alpha"], "experiment1.png")
+                "Evaluation returns for Naive DQN, changing learning rates", ["alpha"], "experiment1.png")
     # Experiment 2
     create_plot(outdir, param_combinations[7:10], n_repetitions, n_envsteps, eval_interval,
-                "Test plot", ["update_freq"], "experiment2.png")
+                "Evaluation returns for Naive DQN, changing update frequency", ["update_freq"], "experiment2.png")
     # Experiment 3
     create_plot(outdir, param_combinations[10:13], n_repetitions, n_envsteps, eval_interval,
-                "Test plot", ["decay_rate"], "experiment3.png")
+                "Evaluation returns for Naive DQN, changing epsilon decay rate", ["decay_rate"], "experiment3.png",
+                plot_eps=True)
     # Experiment 4
     create_plot(outdir, param_combinations[13:16], n_repetitions, n_envsteps, eval_interval,
-                "Test plot", ["hidden_dim"], "experiment4.png")
+                "Evaluation returns for Naive DQN, changing hidden layer dimension", ["hidden_dim"], "experiment4.png")
+
+    # Compare best Naive and Full with baseline
+    create_plot(outdir, [param_combinations[x] for x in [0, 10]], n_repetitions, n_envsteps, eval_interval,
+                "Comparing Full DQN with the best found Naive DQN configuration", ["decay_rate", "tn", "er"],
+                "bestcomp.png", plot_eps=True, plot_baseline=False)

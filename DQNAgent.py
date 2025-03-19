@@ -32,7 +32,7 @@ class DQNAgent:
         self.tn = tn
         self.er = er
         self.memory_size = 10000
-        self.batch_size = 64
+        self.batch_size = 32
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # self.device = torch.device("cpu")
