@@ -201,7 +201,7 @@ if __name__ == '__main__':
     create_plot(outdir, param_combinations[13:16], n_repetitions, n_envsteps, eval_interval,
                 "Evaluation returns for Naive DQN, changing hidden layer dimension", ["hidden_dim"], "experiment4.png")
 
-    # Compare best Naive and Full with baseline
+    # Compare best Naive and Full
     create_plot(outdir, [param_combinations[x] for x in [0, 10]], n_repetitions, n_envsteps, eval_interval,
                 "Comparing Full DQN with the best found Naive DQN configuration", ["decay_rate", "tn", "er"],
                 "bestcomp.png", plot_eps=True, plot_baseline=False)
