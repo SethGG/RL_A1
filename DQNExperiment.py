@@ -7,6 +7,7 @@ import torch.multiprocessing as mp
 
 
 def evaluation(agent: DQNAgent):
+    # Evaluate the agent's performance in the environment
     env = gym.make('CartPole-v1')
     s, info = env.reset()
     done = False
@@ -21,6 +22,7 @@ def evaluation(agent: DQNAgent):
 
 
 def run_single_repetition(task):
+    # Run a single repetition of the experiment
     config_id, rep_id, n_envsteps, eval_internal, params = task
     alpha = params["alpha"]
     gamma = params["gamma"]
@@ -31,9 +33,9 @@ def run_single_repetition(task):
     tn = params["tn"]
     er = params["er"]
 
-    tn_update_freq = 5
+    tn_update_freq = 5  # Frequency of target network updates
 
-    # Create a new environment and agent for each repetition.
+    # Create a new environment and agent for each repetition
     env = gym.make('CartPole-v1')
     n_actions = env.action_space.n
     n_states = env.observation_space.shape[0]
@@ -51,6 +53,7 @@ def run_single_repetition(task):
         s = s_next
 
         if done or trunc:
+            # Reset the environment and decay epsilon
             s, info = env.reset()
             epsilon *= decay_rate
             tn_update_count += 1
@@ -59,6 +62,7 @@ def run_single_repetition(task):
                 tn_update_count = 0
 
         if step % eval_internal == 0:
+            # Evaluate the agent periodically
             eval_return = evaluation(agent)
             eval_returns[eval_num] = eval_return
             eval_epsilon[eval_num] = epsilon
@@ -71,12 +75,14 @@ def run_single_repetition(task):
 
 
 def conf_filename(outdir, params, suffix):
+    # Generate a filename for saving results based on parameters
     filename = "_".join(f"{key}_{value}" for key, value in params.items()) + f"_{suffix}.csv"
     return os.path.join(outdir, filename)
 
 
 def run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval):
-    processes = 3
+    # Run experiments with different parameter combinations
+    processes = 3  # Number of parallel processes
 
     os.makedirs(outdir, exist_ok=True)
 
@@ -109,6 +115,7 @@ def run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_
 
 def create_plot(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval, title, label_params, plotfile,
                 plot_eps=False, plot_baseline=False):
+    # Create plots for the experiment results
     smoothing_window = 31
     plot = LearningCurvePlot(title)
 
@@ -138,6 +145,7 @@ def create_plot(outdir, param_combinations, n_repetitions, n_envsteps, eval_inte
 
 
 if __name__ == '__main__':
+    # Define parameter combinations for the experiments
     param_combinations = [
         # Experiment 5 (tn and er)
         {"gamma": 1, "alpha": 0.001, "update_freq": 4, "epsilon": 1,
@@ -178,10 +186,10 @@ if __name__ == '__main__':
             "decay_rate": 0.9999, "hidden_dim": 128, "tn": False, "er": False},
     ]
 
-    n_repetitions = 5
-    n_envsteps = 1000000
-    eval_interval = 1000
-    outdir = f"evaluations_{n_envsteps}_envsteps"
+    n_repetitions = 5  # Number of repetitions for each experiment
+    n_envsteps = 1000000  # Number of environment steps
+    eval_interval = 1000  # Interval for evaluation
+    outdir = f"evaluations_{n_envsteps}_envsteps"  # Output directory for results
 
     run_experiments(outdir, param_combinations, n_repetitions, n_envsteps, eval_interval)
     # Experiment 5
